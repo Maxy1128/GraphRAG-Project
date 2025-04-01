@@ -120,7 +120,7 @@ graphrag index --root ./ragtest
 This process may take time depending on your dataset size. Once complete, check the `./ragtest/output` folder for generated parquet files and, if enabled, a `merged_graph.graphml` file for visualization.
 
 ### Step 6: Query the Indexed Data
-Use the query engine to extract insights. Examples:
+Use the query engine to extract insights via the CLI. Examples:
 
 - **Global Search** (high-level themes):
 
@@ -134,10 +134,16 @@ Use the query engine to extract insights. Examples:
   graphrag query --root ./ragtest --method local --query "Who is Scrooge and what are his main relationships?"
   ```
 
-See the [Query Engine documentation](https://github.com/microsoft/graphrag/blob/main/docs/query_engine.md) for more on different queries.
+Alternatively, use custom search scripts in the `search` folder instead of the CLI:
+- `drift_search.ipynb`
+- `global_search.ipynb`
+- `local_search.ipynb`
+
+See the [Query Engine documentation](https://github.com/microsoft/graphrag/blob/main/docs/query_engine.md) for more on local vs. global search.
+
 
 ### Step 7: Visualize the Knowledge Graph
-To visualize the graph, ensure `snapshots.graphml: true` is set in `settings.yaml` before indexing. Then follow these steps:
+To visualize the overall graph, ensure `snapshots.graphml: true` is set in `settings.yaml` before indexing, then use Gephi:
 
 1. **Locate the Graph File**: After indexing, find `merged_graph.graphml` in `./ragtest/output`.
 2. **Install Gephi**: Download and install [Gephi](https://gephi.org/).
@@ -152,6 +158,10 @@ To visualize the graph, ensure `snapshots.graphml: true` is set in `settings.yam
 
 The resulting graph will be organized and ready for analysis.
 See the [Visualization Guide](https://microsoft.github.io/graphrag/visualization_guide/) for more details.
+
+For specific community visualization or to visualize the search process, refer to the custom scripts in the `visualization` folder:
+- `visualize_community.ipynb`: Visualizes a specific community.
+- `visualize_local_search.ipynb`: Visualizes local search.
 
 ## Project Notes
 - Place your own data in `./ragtest/input`, ensuring it’s in `.txt` or `.csv` format.
