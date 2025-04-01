@@ -45,7 +45,7 @@ The `settings.yaml` file allows you to customize the pipeline, including the mod
 - **Model and Parameters**: Adjust the `llm` section to specify your desired model (e.g., `gpt-4`) and parameters (e.g., chunk size). Example:
 
   ```yaml
-models:
+  models:
     model: gpt-4
     tokens_per_minute: 150_000
     requests_per_minute: 10_000
