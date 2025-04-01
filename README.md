@@ -134,7 +134,7 @@ Use the query engine to extract insights. Examples:
   graphrag query --root ./ragtest --method local --query "Who is Scrooge and what are his main relationships?"
   ```
 
-See the [Query Engine documentation](https://github.com/microsoft/graphrag/blob/main/docs/query_engine.md) for more on local vs. global search.
+See the [Query Engine documentation](https://github.com/microsoft/graphrag/blob/main/docs/query_engine.md) for more on different queries.
 
 ### Step 7: Visualize the Knowledge Graph
 To visualize the graph, ensure `snapshots.graphml: true` is set in `settings.yaml` before indexing. Then follow these steps:
@@ -151,6 +151,7 @@ To visualize the graph, ensure `snapshots.graphml: true` is set in `settings.yam
    - Add text labels if desired.
 
 The resulting graph will be organized and ready for analysis.
+See the [Visualization Guide](https://microsoft.github.io/graphrag/visualization_guide/) for more details.
 
 ## Project Notes
 - Place your own data in `./ragtest/input`, ensuring it’s in `.txt` or `.csv` format.
