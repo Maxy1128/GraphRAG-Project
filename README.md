@@ -1,20 +1,17 @@
-Below is a README file tailored for your GitHub repository based on the official GraphRAG tutorial, incorporating your specific requirements (e.g., modifying `settings.yaml` for CSV input and graph visualization, excluding Azure OpenAI details). It’s structured clearly for your mentor to follow your project’s operational steps.
-
----
-
 # GraphRAG Project README
 
-This repository contains the documentation and code for a project utilizing the **GraphRAG** system to index and query text data, as well as visualize the resulting knowledge graph. The steps below outline the process from setup to querying and visualization, based on the official GraphRAG documentation.
+This repository contains the documentation and code for a project utilizing the **GraphRAG** to index and query data, as well as visualize the resulting knowledge graph. The steps below outline the process from setup to querying and visualization, based on the official GraphRAG documentation.
 
 ## Requirements
 - **Python**: 3.10–3.12
 
 ## Getting Started
-To set up and run this project, follow these steps. This guide assumes you’re installing GraphRAG from PyPI and working with a sample dataset.
+To set up and run this project, follow these steps. This guide assumes you’re installing GraphRAG from PyPI.
 
 ### Step 1: Install GraphRAG
 Install the GraphRAG package via pip:
-```bash
+
+```
 pip install graphrag
 ```
 
@@ -22,20 +19,19 @@ The `graphrag` library provides a CLI for a no-code approach. Refer to the [offi
 
 ### Step 2: Prepare the Dataset
 Create a directory for your input data:
-```bash
+
+```
 mkdir -p ./ragtest/input
 ```
 
-For this example, download *A Christmas Carol* by Charles Dickens from Project Gutenberg:
-```bash
-curl https://www.gutenberg.org/cache/epub/24022/pg24022.txt -o ./ragtest/input/book.txt
-```
-
-Alternatively, if your input is a CSV file (e.g., with columns like "Source" and "Text"), place it in `./ragtest/input`. The CSV setup is detailed in the configuration section below.
+Place your input files in the `./ragtest/input` folder. Only two file formats are accepted:
+- **Plain text files** (`.txt`)
+- **CSV files** (`.csv`) – Must include columns like "Source" and "Text" (see configuration details below).
 
 ### Step 3: Initialize the Workspace
 Initialize the GraphRAG workspace:
-```bash
+
+```
 graphrag init --root ./ragtest
 ```
 
@@ -47,14 +43,17 @@ This creates two files in the `./ragtest` directory:
 The `settings.yaml` file allows you to customize the pipeline, including the model and input type. Below are key modifications:
 
 - **Model and Parameters**: Adjust the `llm` section to specify your desired model (e.g., `gpt-4`) and parameters (e.g., chunk size). Example:
+
   ```yaml
-  llm:
+models:
     model: gpt-4
-    max_tokens: 4096
-    chunk_size: 800
+    tokens_per_minute: 150_000
+    requests_per_minute: 10_000
+    ...
   ```
 
 - **CSV Input**: If using a CSV file instead of the default `.txt`, update the `input` section. GraphRAG will only read the `text_column` for graph creation:
+
   ```yaml
   input:
     type: file
@@ -67,37 +66,77 @@ The `settings.yaml` file allows you to customize the pipeline, including the mod
   ```
 
 - **Graph Visualization**: To enable graph visualization (disabled by default), set:
+
   ```yaml
   snapshots:
     graphml: true
   ```
 
-Review and modify `settings.yaml` as needed for your project.
+Review and modify `settings.yaml` as needed.
 
-### Step 4: Run the Indexing Pipeline
+### Step 4: Prompt Tuning
+Before running the indexing pipeline, you can tune the prompts to improve the knowledge graph generation. GraphRAG offers default prompts, auto-tuning, and manual tuning options. Auto-tuning is recommended for better results tailored to your data.
+
+#### Auto Prompt Tuning
+Run the auto-tuning script to generate domain-adapted prompts (optional but encouraged):
+
+```
+graphrag prompt-tune --root ./ragtest --config ./ragtest/settings.yaml
+```
+
+This uses default settings to process your input data and generate prompts in the `./ragtest/prompts` folder. For custom settings (e.g., domain or chunk size), use:
+
+```
+graphrag prompt-tune --root ./ragtest --config ./ragtest/settings.yaml --domain "your_domain" --chunk-size 256 --max-tokens 2048
+```
+
+Key options:
+- `--domain`: Specify your data’s domain (e.g., "environmental news"). If omitted, it’s inferred from the data.
+- `--selection-method`: Choose `random` (default), `top`, `all`, or `auto` for text unit selection.
+- `--limit`: Limit text units (default: 15) for `random` or `top` methods.
+- `--chunk-size`: Token size for text units (default: 200).
+- `--output`: Folder for generated prompts (default: "prompts").
+
+See the [Auto Tuning documentation](https://microsoft.github.io/graphrag/prompt_tuning/auto_prompt_tuning/) for more details.
+
+#### Manual Prompt Tuning
+For advanced customization, edit the prompt files directly in the `prompts` folder:
+- Entity/Relationship Extraction: `extract_graph.txt`
+- Summarize Descriptions: `summarize_descriptions.txt`
+- Claim Extraction: `extract_claims.txt`
+- Community Reports: `community_report_text.txt`
+
+**Note**: These file names are specific to GraphRAG 2.0. Earlier versions may use different names.
+
+Refer to the [Manual Tuning documentation](https://microsoft.github.io/graphrag/prompt_tuning/manual_prompt_tuning/) for token details and customization.
+
+### Step 5: Run the Indexing Pipeline
 Execute the indexing pipeline:
-```bash
+
+```
 graphrag index --root ./ragtest
 ```
 
-This process may take time depending on your dataset size, model, and chunk size. Once complete, check the `./ragtest/output` folder for generated parquet files and, if enabled, a `merged_graph.graphml` file for visualization.
+This process may take time depending on your dataset size. Once complete, check the `./ragtest/output` folder for generated parquet files and, if enabled, a `merged_graph.graphml` file for visualization.
 
-### Step 5: Query the Indexed Data
+### Step 6: Query the Indexed Data
 Use the query engine to extract insights. Examples:
 
 - **Global Search** (high-level themes):
-  ```bash
+
+  ```
   graphrag query --root ./ragtest --method global --query "What are the top themes in this story?"
   ```
 
 - **Local Search** (specific details):
-  ```bash
+
+  ```
   graphrag query --root ./ragtest --method local --query "Who is Scrooge and what are his main relationships?"
   ```
 
 See the [Query Engine documentation](https://github.com/microsoft/graphrag/blob/main/docs/query_engine.md) for more on local vs. global search.
 
-### Step 6: Visualize the Knowledge Graph
+### Step 7: Visualize the Knowledge Graph
 To visualize the graph, ensure `snapshots.graphml: true` is set in `settings.yaml` before indexing. Then follow these steps:
 
 1. **Locate the Graph File**: After indexing, find `merged_graph.graphml` in `./ragtest/output`.
@@ -114,7 +153,7 @@ To visualize the graph, ensure `snapshots.graphml: true` is set in `settings.yam
 The resulting graph will be organized and ready for analysis.
 
 ## Project Notes
-- This project uses *A Christmas Carol* as a sample dataset. Replace it with your own data in `./ragtest/input`.
+- Place your own data in `./ragtest/input`, ensuring it’s in `.txt` or `.csv` format.
 - For CSV inputs, ensure your file matches the `source_column` and `text_column` specified in `settings.yaml`.
 - Adjust model parameters in `settings.yaml` to optimize performance for your dataset.
 
@@ -122,7 +161,3 @@ The resulting graph will be organized and ready for analysis.
 - [GraphRAG GitHub](https://github.com/microsoft/graphrag)
 - [Configuration Documentation](https://github.com/microsoft/graphrag/blob/main/docs/configuration.md)
 - [CLI Documentation](https://github.com/microsoft/graphrag/blob/main/docs/cli.md)
-
----
-
-This README is ready to be placed in your GitHub repository. It’s concise, includes all necessary steps, and reflects your project-specific adjustments (CSV input and graph visualization). Let me know if you’d like to refine it further or add code snippets!
