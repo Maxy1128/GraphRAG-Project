@@ -200,7 +200,7 @@ For interactive and localized graph visualization (e.g., a single community):
   - Clickable nodes and edges with more details (e.g., entity description).
   - Customize subgraph visualizations to zoom in on suspicious entities.
 Graph for a community in this project:
-![community Graph](./pics/community_graph.png)
+![community Graph](./pics/community_graph.PNG)
 
 #### Method 3: Use Online Visualization Tool for GraphRAG
 There is an online visualization tool developed specifically for GraphRAG:
