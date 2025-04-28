@@ -51,7 +51,7 @@ The `settings.yaml` file allows to customize the pipeline, including the model a
 
   ```yaml
   models:
-    model: gpt-4
+    model: gpt-4o
     tokens_per_minute: 150_000
     requests_per_minute: 10_000
     ...
@@ -88,7 +88,7 @@ GraphRAG offers default prompts, auto-tuning, and manual tuning options. Auto-tu
 Run the auto-tuning script to generate domain-adapted prompts (optional but encouraged):
 
 ```
-graphrag prompt-tune --root ./ragtest --config ./ragtest/settings.yaml --domain "finance"
+graphrag prompt-tune --root ./ragtest --config ./ragtest/settings.yaml
 
 ```
 
@@ -118,7 +118,7 @@ For advanced customization, edit the prompt files directly in the `prompts` fold
 
 Refer to the [Manual Tuning documentation](https://microsoft.github.io/graphrag/prompt_tuning/manual_prompt_tuning/) for token details and customization.
 
-The default prompts are under prompt/.
+The default prompts are under prompts/.
 
 ### Step 5: Run the Indexing Pipeline
 Execute the indexing pipeline:
@@ -159,7 +159,7 @@ Directly use the GraphRAG CLI to query the indexed graph. Examples:
   --method drift ^
   --query "Summarize all methodologies for identifying shell companies. Additionally, identify and describe any new risk patterns associated with shell companies."
   ```
-#### Method 1: Use Search Scripts in the search/ Folder
+#### Method 2: Use Search Scripts in the search/ Folder
 Alternatively, use custom search scripts in the `search` folder:
 
 - `drift_search.ipynb`
@@ -193,14 +193,14 @@ The overall graph for this project:
 For interactive and localized graph visualization (e.g., a single community):
 
 1. Open the visualization/ folder.
-
 2. Use the provided Jupyter Notebooks, such as:
   - `visualize_community.ipynb`: Visualizes a specific community.
   - `visualize_local_search.ipynb`: Visualizes local search.
-
 3. Features:
   - Clickable nodes and edges with more details (e.g., entity description).
   - Customize subgraph visualizations to zoom in on suspicious entities.
+Graph for a community in this project:
+![community Graph](./pics/community_graph.png)
 
 #### Method 3: Use Online Visualization Tool for GraphRAG
 There is an online visualization tool developed specifically for GraphRAG:
@@ -213,11 +213,6 @@ There is an online visualization tool developed specifically for GraphRAG:
 #### Method 4: Use Neo4j for Advanced Graph Database Operations
 Official integration guide:
 [neo4j-graphrag-python GitHub Repository](https://github.com/neo4j/neo4j-graphrag-python)
-
-## Project Notes
-- Place your own data in `./ragtest/input`, ensuring it’s in `.txt` or `.csv` format.
-- For CSV inputs, ensure your file matches the `source_column` and `text_column` specified in `settings.yaml`.
-- Adjust model parameters in `settings.yaml` to optimize performance for your dataset.
 
 ## Additional Resources
 - [GraphRAG GitHub](https://github.com/microsoft/graphrag)
