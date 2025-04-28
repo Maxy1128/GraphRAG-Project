@@ -1,7 +1,4 @@
 # GraphRAG Project README
-
-This repository contains the documentation and code for a project utilizing the **GraphRAG** to index and query data, as well as visualize the resulting knowledge graph. The steps below outline the process from setup to querying and visualization, based on the official GraphRAG documentation.
-
 This repository contains the documentation and code for a project that applies **GraphRAG** to assist fraud detection, particularly shell companies, using a private dataset from Moody's called Shell Company Indicator.
 The project builds a financial knowledge graph, enables rapid querying, and visualizes risk patterns, aiming to support users in fraud detection.
 
@@ -33,9 +30,9 @@ Place input files in the `./ragtest/input` folder. Only two file formats are acc
 - **Plain text files** (`.txt`)
 - **CSV files** (`.csv`) – Must include columns like "Source" and "Text" (see configuration details below).
 
-For this project, we used a small subset of SCI records. Data was processed into a single CSV file with relevant columns merged. Data processing scripts are provided in the data_process/ folder.
+For this project, we used a small subset of SCI records. Data was processed into a single CSV file with relevant columns merged. Data processing scripts are provided in the data processiing/ folder.
 
-Due to data confidentiality, we only provide a sample_input.csv under input/.
+Due to data confidentiality, we only provide a sample_input.csv under sample input/.
 
 ### Step 3: Initialize the Workspace
 Initialize a GraphRAG project:
@@ -91,7 +88,8 @@ GraphRAG offers default prompts, auto-tuning, and manual tuning options. Auto-tu
 Run the auto-tuning script to generate domain-adapted prompts (optional but encouraged):
 
 ```
-graphrag prompt-tune --root ./ragtest --config ./ragtest/settings.yaml
+graphrag prompt-tune --root ./ragtest --config ./ragtest/settings.yaml --domain "finance"
+
 ```
 
 This uses default settings to process your input data and generate prompts in the `./ragtest/prompts` folder. For custom settings (e.g., domain or chunk size), use:
