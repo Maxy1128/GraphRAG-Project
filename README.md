@@ -2,35 +2,43 @@
 
 This repository contains the documentation and code for a project utilizing the **GraphRAG** to index and query data, as well as visualize the resulting knowledge graph. The steps below outline the process from setup to querying and visualization, based on the official GraphRAG documentation.
 
+This repository contains the documentation and code for a project that applies **GraphRAG** to assist fraud detection, particularly shell companies, using a private dataset from Moody's called Shell Company Indicator.
+The project builds a financial knowledge graph, enables rapid querying, and visualizes risk patterns, aiming to support users in fraud detection.
+
 ## Requirements
 - **Python**: 3.10–3.12
-
+- **GraphRAG**: 2.0.0
+- Optional: Install Gephi for graph visualization
+  
 ## Getting Started
-To set up and run this project, follow these steps. This guide assumes you’re installing GraphRAG from PyPI.
+To set up and run this project, follow these steps.
 
 ### Step 1: Install GraphRAG
 Install the GraphRAG package via pip:
 
 ```
-pip install graphrag
+pip install graphrag==2.0.0
 ```
 
 The `graphrag` library provides a CLI for a no-code approach. Refer to the [official CLI documentation](https://github.com/microsoft/graphrag/blob/main/docs/cli.md) for more details.
 
 ### Step 2: Prepare the Dataset
-Create a directory for your input data:
+Create a directory for the input data:
 
 ```
 mkdir -p ./ragtest/input
 ```
 
-Place your input files in the `./ragtest/input` folder. Only two file formats are accepted:
+Place input files in the `./ragtest/input` folder. Only two file formats are accepted:
 - **Plain text files** (`.txt`)
 - **CSV files** (`.csv`) – Must include columns like "Source" and "Text" (see configuration details below).
 
-### Step 3: Initialize the Workspace
-Initialize the GraphRAG workspace:
+For this project, we used a small subset of SCI records. Data was processed into a single CSV file with relevant columns merged. Data processing scripts are provided in the data_process/ folder.
 
+Due to data confidentiality, we only provide a sample_input.csv under input/.
+
+### Step 3: Initialize the Workspace
+Initialize a GraphRAG project:
 ```
 graphrag init --root ./ragtest
 ```
@@ -40,9 +48,9 @@ This creates two files in the `./ragtest` directory:
 - `settings.yaml`: Pipeline configuration file (see customization details below).
 
 #### Configuring `settings.yaml`
-The `settings.yaml` file allows you to customize the pipeline, including the model and input type. Below are key modifications:
+The `settings.yaml` file allows to customize the pipeline, including the model and input type. Below are key modifications:
 
-- **Model and Parameters**: Adjust the `llm` section to specify your desired model (e.g., `gpt-4`) and parameters (e.g., chunk size). Example:
+- **Model and Parameters**: Adjust the `llm` section to specify desired model (e.g., `gpt-4`) and parameters (e.g., chunk size). Example:
 
   ```yaml
   models:
@@ -52,7 +60,7 @@ The `settings.yaml` file allows you to customize the pipeline, including the mod
     ...
   ```
 
-- **CSV Input**: If using a CSV file instead of the default `.txt`, update the `input` section. GraphRAG will only read the `text_column` for graph creation:
+- **CSV Input**: If using a CSV file instead of the default `.txt`, update the `input` section. GraphRAG will only read the `Text' column for graph creation:
 
   ```yaml
   input:
@@ -75,7 +83,9 @@ The `settings.yaml` file allows you to customize the pipeline, including the mod
 Review and modify `settings.yaml` as needed.
 
 ### Step 4: Prompt Tuning
-Before running the indexing pipeline, you can tune the prompts to improve the knowledge graph generation. GraphRAG offers default prompts, auto-tuning, and manual tuning options. Auto-tuning is recommended for better results tailored to your data.
+Before running the indexing pipeline, you can tune the prompts to improve the knowledge graph generation. For this project, we tuned prompts to make GraphRAG fit SCI data better.
+
+GraphRAG offers default prompts, auto-tuning, and manual tuning options. Auto-tuning is recommended for better results tailored to the data.
 
 #### Auto Prompt Tuning
 Run the auto-tuning script to generate domain-adapted prompts (optional but encouraged):
@@ -106,9 +116,11 @@ For advanced customization, edit the prompt files directly in the `prompts` fold
 - Claim Extraction: `extract_claims.txt`
 - Community Reports: `community_report_text.txt`
 
-**Note**: These file names are specific to GraphRAG 2.0. Earlier versions may use different names.
+**Note**: These file names are specific to GraphRAG 2.0.0. Earlier versions may use different names.
 
 Refer to the [Manual Tuning documentation](https://microsoft.github.io/graphrag/prompt_tuning/manual_prompt_tuning/) for token details and customization.
+
+The default prompts are under prompt/.
 
 ### Step 5: Run the Indexing Pipeline
 Execute the indexing pipeline:
@@ -117,32 +129,50 @@ Execute the indexing pipeline:
 graphrag index --root ./ragtest
 ```
 
-This process may take time depending on your dataset size. Once complete, check the `./ragtest/output` folder for generated parquet files and, if enabled, a `merged_graph.graphml` file for visualization.
+This process may take time depending on the dataset size. Once complete, check the `./ragtest/output` folder for generated parquet files and, if enabled, a `merged_graph.graphml` file for visualization.
 
 ### Step 6: Query the Indexed Data
-Use the query engine to extract insights via the CLI. Examples:
+#### Method 1: Use CLI
+Directly use the GraphRAG CLI to query the indexed graph. Examples:
 
 - **Global Search** (high-level themes):
 
   ```
-  graphrag query --root ./ragtest --method global --query "What are the top themes in this story?"
+  graphrag query ^
+  --root ./ragtest ^
+  --method global ^
+  --query "Summarize all methodologies for identifying shell companies. Additionally, identify and describe any new risk patterns associated with     shell companies."
   ```
 
 - **Local Search** (specific details):
 
   ```
-  graphrag query --root ./ragtest --method local --query "Who is Scrooge and what are his main relationships?"
+  python -m graphrag.query ^
+  --root ./ragtest ^
+  --method local ^
+  --query "Tell me about Palladia Limited."
   ```
 
-Alternatively, use custom search scripts in the `search` folder instead of the CLI:
+- **Drift Search** (combine global and local):
+
+  ```
+  python -m graphrag.query ^
+  --root ./ragtest ^
+  --method drift ^
+  --query "Summarize all methodologies for identifying shell companies. Additionally, identify and describe any new risk patterns associated with shell companies."
+  ```
+#### Method 1: Use Search Scripts in the search/ Folder
+Alternatively, use custom search scripts in the `search` folder:
+
 - `drift_search.ipynb`
 - `global_search.ipynb`
 - `local_search.ipynb`
 
-See the [Query Engine documentation](https://github.com/microsoft/graphrag/blob/main/docs/query_engine.md) for more on local vs. global search.
+See the [Query Engine documentation](https://github.com/microsoft/graphrag/blob/main/docs/query_engine.md) for more on local vs. global vs. drift search.
 
 
 ### Step 7: Visualize the Knowledge Graph
+#### Method 1: Use Gephi for Full Graph Visualization
 To visualize the overall graph, ensure `snapshots.graphml: true` is set in `settings.yaml` before indexing, then use Gephi:
 
 1. **Locate the Graph File**: After indexing, find `merged_graph.graphml` in `./ragtest/output`.
@@ -158,10 +188,33 @@ To visualize the overall graph, ensure `snapshots.graphml: true` is set in `sett
 
 The resulting graph will be organized and ready for analysis.
 See the [Visualization Guide](https://microsoft.github.io/graphrag/visualization_guide/) for more details.
+The overall graph for this project:
+![Overall Knowledge Graph](./pics/overall_graph.png)
 
-For specific community visualization or to visualize the search process, refer to the custom scripts in the `visualization` folder:
-- `visualize_community.ipynb`: Visualizes a specific community.
-- `visualize_local_search.ipynb`: Visualizes local search.
+#### Method 2: Use yFiles Jupyter Graphs for Interactive Exploration
+For interactive and localized graph visualization (e.g., a single community):
+
+1. Open the visualization/ folder.
+
+2. Use the provided Jupyter Notebooks, such as:
+  - `visualize_community.ipynb`: Visualizes a specific community.
+  - `visualize_local_search.ipynb`: Visualizes local search.
+
+3. Features:
+  - Clickable nodes and edges with more details (e.g., entity description).
+  - Customize subgraph visualizations to zoom in on suspicious entities.
+
+#### Method 3: Use Online Visualization Tool for GraphRAG
+There is an online visualization tool developed specifically for GraphRAG:
+
+[GraphRAG Visualizer](https://noworneverev.github.io/graphrag-visualizer) (Interactive Online Tool)
+- Drag and drop generated parquet files.
+- Interactive exploration with zooming, filtering, and node clicking.
+- No need for local installation.
+
+#### Method 4: Use Neo4j for Advanced Graph Database Operations
+Official integration guide:
+[neo4j-graphrag-python GitHub Repository](https://github.com/neo4j/neo4j-graphrag-python)
 
 ## Project Notes
 - Place your own data in `./ragtest/input`, ensuring it’s in `.txt` or `.csv` format.
